@@ -1,28 +1,30 @@
 import { ListGroup } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 export default function CourseNavigation() {
+  const { cid } = useParams();
+  const { pathname } = useLocation();
+  const links = [
+    { label: "Home", path: "Home" },
+    { label: "Modules", path: "Modules" },
+    { label: "Piazza", path: "Piazza" },
+    { label: "Zoom", path: "Zoom" },
+    { label: "Assignments", path: "Assignments" },
+    { label: "Quizzes", path: "Quizzes" },
+    { label: "People", path: "People" },
+  ];
   return (
     <ListGroup className="rounded-0 wd">
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Home"
-        className="active border border-0"> Home </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Modules" 
-        className="text-danger border border-0"> Modules </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Piazza"
-        className="text-danger border border-0"> Piazza </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Zoom"
-        className="text-danger border border-0"> Zoom </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Assignments"
-        className="text-danger border border-0"> Assignments </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/Quizzes"
-        className="text-danger border border-0"> Quizzes </ListGroup.Item>
-
-      <ListGroup.Item as={Link} to="/Kambaz/Courses/1234/People"
-        className="text-danger border border-0" > People </ListGroup.Item>
+      {links.map((link) => (
+        <ListGroup.Item
+          key={link.path}
+          as={Link}
+          to={`/Kambaz/Courses/${cid}/${link.path}`}
+          className={`border border-0 text-danger ${pathname.includes(link.path) ? "active" : ""}`}
+        >
+          {link.label}
+        </ListGroup.Item>
+      ))}
     </ListGroup>
-);}
+  );
+}

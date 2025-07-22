@@ -4,5 +4,6 @@ export default function AssnControlButtons() {
   return (
     <div className="float-end">
       <GreenCheckmark />
-      <IoEllipsisVertical className="fs-4" />
-    </div> );}
+      <IoEllipsisVertical />
+    </div>);
+}

@@ -4,78 +4,49 @@ import AssnCatControlButtons from "./AssnCatControlButtons";
 import AssnControlButtons from "./AssnControlButtons";
 import { BsGripVertical } from "react-icons/bs";
 import { MdAssignment } from "react-icons/md";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database";
 
 
 export default function Assignments() {
+  const { cid } = useParams();
+  const courseAssignments = db.assignments.filter((a) => a.course === cid);
   return (
-    <div>
-      <AssignmentsControls /><br/><br/><br/><br/>
+    <div id="wd-assignments">
+      <AssignmentsControls />
 
-      <ListGroup id="wd-assignments" className="rounded-0">
+      <ListGroup className="rounded-0 mt-5">
         <ListGroup.Item className="wd-assn-cat p-0 mb-5 fs-5 border-gray">
-          <div className="wd-category p-3 ps-2 bg-secondary"> 
-            <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS <AssnCatControlButtons /> 
+          <div className="wd-category p-3 ps-2 bg-secondary">
+            <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS <AssnCatControlButtons />
           </div>
           <ListGroup className="wd-assns rounded-0">
-            <ListGroup.Item className="wd-assn p-3 ps-1" style={{ borderLeft: "4px solid green" }}>
-              <div className="d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <MdAssignment className="me-2 fs-3 text-danger" />
-                <a href="#/Kambaz/Courses/1234/Assignments/123" className="text-decoration-none" style={{ color: "black" }}>A1</a>
-                <div className="ms-auto">
-                  <AssnControlButtons />
+            {courseAssignments.map((a) => (
+              <ListGroup.Item key={a._id} className="wd-assn p-3 ps-1">
+                <div className="d-flex align-items-center">
+                  <BsGripVertical className="me-2 fs-3" />
+                  <MdAssignment className="me-3 fs-3 text-success" />
+                  <div>
+                    <Link to={`/Kambaz/Courses/${cid}/Assignments/${a._id}`} className="wd-assn-link">
+                      {a.title}
+                    </Link><br />
+                    <div style={{ fontSize: "0.825rem" }}>
+                      <span className="text-danger">
+                        Multiple Modules
+                      </span> | {" "}
+                      <b>Not available until</b> {a.available} | <br />
+                      <b>Due</b> {a.due} | {a.points} pts
+                    </div>
+                  </div>
+                  <div className="ms-auto">
+                    <AssnControlButtons />
+                  </div>
                 </div>
-              </div>
-              <div className="mt-2" style={{ fontSize: "0.875rem", paddingLeft: "2.5rem" }}> 
-                <div>
-                  <span className="text-danger">Multiple Modules |</span> 
-                  <span style={{ color: "gray" }}> <b>Not available until</b> May 6 at 12:00am |</span> 
-                  <span style={{ color: "gray" }}> <b>Due</b> May 13 at 11:59pm |</span> 
-                  <span style={{ color: "gray" }}> 100 pts</span>
-                </div>
-              </div>
-            </ListGroup.Item>
-            <ListGroup.Item className="wd-assn p-3 ps-1" style={{ borderLeft: "4px solid green" }}>
-              <div className="d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <MdAssignment className="me-2 fs-3 text-danger" /> 
-                <a href="#/Kambaz/Courses/1234/Assignments/234" className="text-decoration-none" style={{ color: "black" }}>A2</a>
-                <div className="ms-auto">
-                  <AssnControlButtons />
-                </div>
-              </div>
-              <div className="mt-2" style={{ fontSize: "0.875rem", paddingLeft: "2.5rem" }}> 
-                <div>
-                  <span className="text-danger">Multiple Modules |</span> 
-                  <span style={{ color: "gray" }}> <b>Not available until</b> May 13 at 12:00am |</span> 
-                  <span style={{ color: "gray" }}> <b>Due</b> May 20 at 11:59pm |</span> 
-                  <span style={{ color: "gray" }}> 100 pts</span>
-                </div>
-              </div>
-            </ListGroup.Item>
-            <ListGroup.Item className="wd-assn p-3 ps-1" style={{ borderLeft: "4px solid green" }}>
-              <div className="d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <MdAssignment className="me-2 fs-3 text-danger" /> 
-                <a href="#/Kambaz/Courses/1234/Assignments/345" className="text-decoration-none" style={{ color: "black" }}>A3</a>
-                <div className="ms-auto">
-                  <AssnControlButtons />
-                </div>
-              </div>
-              <div className="mt-2" style={{ fontSize: "0.875rem", paddingLeft: "2.5rem" }}> 
-                <div>
-                  <span className="text-danger">Multiple Modules |</span> 
-                  <span style={{ color: "gray" }}> <b>Not available until</b> May 20 at 12:00am |</span> 
-                  <span style={{ color: "gray" }}> <b>Due</b> May 27 at 11:59pm |</span> 
-                  <span style={{ color: "gray" }}> 100 pts</span>
-                </div>
-              </div>
-            </ListGroup.Item>
+              </ListGroup.Item>
+            ))}
           </ListGroup>
         </ListGroup.Item>
       </ListGroup>
-      
- 
-      
     </div>
-);}
+  );
+}

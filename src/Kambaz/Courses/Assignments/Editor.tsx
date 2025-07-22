@@ -1,116 +1,103 @@
-import { useState } from "react";
-import { Form, Button } from "react-bootstrap";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useParams, Link } from "react-router-dom";
+import * as db from "../../Database";
+
 
 export default function AssignmentEditor() {
-  const [submissionType, setSubmissionType] = useState("Online");
-
+  const { cid, aid } = useParams();
+  const assignment = db.assignments.find(a => a._id === aid && a.course === cid);
+  if (!assignment) return <h3>Assignment not found</h3>;
   return (
-    <div className="container mt-4">
-      <div className="mx-auto" style={{ maxWidth: "700px" }}>
-        <Form id="wd-assignments-editor">
-      <Form.Group controlId="wd-name">
-        <Form.Label>Assignment Name</Form.Label>
-        <Form.Control type="text" defaultValue="A1" />
-      </Form.Group>
-
-      <Form.Group controlId="wd-description" className="mt-3">
-        <Form.Label>Description</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={5}
-          defaultValue="The assignment is available online"
-        />
-      </Form.Group>
-
-      <Form.Group controlId="wd-points" className="mt-3">
-        <Form.Label>Points</Form.Label>
-        <Form.Control type="number" defaultValue={100} />
-      </Form.Group>
-
-      <Form.Group controlId="wd-assignment-group" className="mt-3">
-        <Form.Label>Assignment Group</Form.Label>
-        <Form.Select>
-          <option>ASSIGNMENTS</option>
-          <option>QUIZZES</option>
-          <option>PROJECT</option>
-        </Form.Select>
-      </Form.Group>
-
-      <Form.Group controlId="wd-display-grade" className="mt-3">
-        <Form.Label>Display Grade as</Form.Label>
-        <Form.Select>
-          <option>Percentage</option>
-          <option>Points</option>
-          <option>Complete/Incomplete</option>
-        </Form.Select>
-      </Form.Group>
-
-      <Form.Label className="mt-3">Submission Type</Form.Label>
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "1rem",
-          borderRadius: "5px",
-        }}
-        className="mt-3"
-      >
-        <Form.Group controlId="wd-submission-type">
-          <Form.Select
-            value={submissionType}
-            onChange={(e) => setSubmissionType(e.target.value)}
-          >
-            <option>Online</option>
-            <option>On Paper</option>
-            <option>No Submission</option>
-          </Form.Select>
-
-          {submissionType === "Online" && (
-            <div className="mt-3">
-              <Form.Label>Online Entry Options</Form.Label>
-              <Form.Check type="checkbox" label="Text Entry" />
-              <Form.Check type="checkbox" label="Website URL" />
-              <Form.Check type="checkbox" label="Media Recordings" />
-              <Form.Check type="checkbox" label="Student Annotation" />
-              <Form.Check type="checkbox" label="File Uploads" />
+    <div id="wd-assignments-editor">
+      <Form>
+        <Form.Group className="ms-1 mb-2">
+          <Form.Label className="mb-2">Assignment Name</Form.Label>
+          <Form.Control id="wd-name" value={assignment.title} />
+        </Form.Group>
+        <div className="ms-1 mb-3 border rounded p-3">
+          <p>{assignment.description}</p>
+        </div>
+      </Form>
+      <Container>
+        <Row className="mb-2">
+          <Col className="text-end" xs={3}>Points</Col>
+          <Col>
+            <Form.Control id="wd-points" value={assignment.points} />
+          </Col>
+        </Row>
+        <Row className="mb-2">
+          <Col className="text-end" xs={3}>Assignment Group</Col>
+          <Col>
+            <Form.Select id="wd-assignment-group" defaultValue="ASSIGNMENTS">
+              <option value="ASSIGNMENTS">ASSIGNMENTS</option>
+            </Form.Select>
+          </Col>
+        </Row>
+        <Row className="mb-2">
+          <Col className="text-end" xs={3}>Display Grade As</Col>
+          <Col>
+            <Form.Select id="wd-grade-display" defaultValue="PERCENT">
+              <option value="PERCENT">Percentage</option>
+            </Form.Select>
+          </Col>
+        </Row>
+        <Row className="mb-2">
+          <Col className="text-end" xs={3}>Submission Type</Col>
+          <Col>
+            <div className="border border-gray rounded-2 p-3">
+              <Form.Select id="wd-submission-type" className="mb-2">
+                <option value="ONLINE">Online</option>
+              </Form.Select>
+              {["Text Entry", "Website URL", "Media Recordings", "Student Annotation", "File Uploads"].map((label, idx) => (
+                <Form.Check
+                  key={idx}
+                  className="ms-2 mb-2"
+                  type="checkbox"
+                  name="wd-online-entry-checkbox"
+                  label={label}
+                />
+              ))}
             </div>
-          )}
-        </Form.Group>
-      </div>
-
-      <Form.Label className="mt-3">Assign</Form.Label>
-      <div
-        style={{
-          border: "1px solid #ccc",
-          padding: "1rem",
-          borderRadius: "5px",
-        }}
-        className="mt-3"
-      >
-        <Form.Group controlId="wd-assign-to">
-          <Form.Label>Assign To</Form.Label>
-          <Form.Control type="text" defaultValue="Everyone" />
-        </Form.Group>
-
-        <Form.Group controlId="wd-due" className="mt-3">
-          <Form.Label>Due</Form.Label>
-          <Form.Control type="date" defaultValue="2024-05-13" />
-        </Form.Group>
-
-        <Form.Group controlId="wd-available-from" className="mt-3">
-          <Form.Label>Available from</Form.Label>
-          <Form.Control type="date" defaultValue="2024-05-06" />
-          <Form.Label className="mt-2">Until</Form.Label>
-          <Form.Control type="date" defaultValue="2024-05-20" />
-        </Form.Group>
-      </div>
-
-      <div className="mt-3">
-        <Button variant="secondary" className="me-2">
-          Cancel
-        </Button>
-        <Button variant="primary">Save</Button>
-      </div>
-        </Form>
+          </Col>
+        </Row>
+        <Row className="mb-2">
+          <Col className="text-end" xs={3}>Assign</Col>
+          <Col>
+            <div className="border border-gray rounded-2 p-3">
+              <Form.Group className="mb-4">
+                <Form.Label className="mb-2"><b>Assign to</b></Form.Label>
+                <Form.Select id="wd-assign-to" >
+                  <option value="EVERY">Everyone</option>
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-4">
+                <Form.Label className="mb-2"><b>Due</b></Form.Label>
+                <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.dueDate} />
+              </Form.Group>
+              <Form.Group>
+                <Row>
+                  <Col>
+                    <Form.Label className="mb-2"><b>Available from</b></Form.Label>
+                    <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.availableDate} />
+                  </Col>
+                  <Col>
+                    <Form.Label className="mb-2"><b>Until</b></Form.Label>
+                    <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.dueDate} />
+                  </Col>
+                </Row>
+              </Form.Group>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+      <hr />
+      <div className="float-end">
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button variant="secondary">Cancel</Button>
+        </Link>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button variant="danger" className="ms-2">Save</Button>
+        </Link>
       </div>
     </div>
   );
