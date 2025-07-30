@@ -3,20 +3,29 @@
 
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addAssignment, updateAssignment } from "./reducer";
-
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   
-  // Get assignments from Redux store instead of database
   const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
   
-  // Check if this is a new assignment (aid === 'new')
+  useEffect(() => {
+    if (!isFaculty) {
+      navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    }
+  }, [isFaculty, navigate, cid]);
+  
+  if (!isFaculty) {
+    return null;
+  }
+  
   const isNewAssignment = aid === 'new';
   const assignment = isNewAssignment ? null : assignments.find((a: any) => a._id === aid && a.course === cid);
   
@@ -61,6 +70,7 @@ export default function AssignmentEditor() {
     
     navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };
+
   return (
     <div id="wd-assignments-editor">
       <Form>

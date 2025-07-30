@@ -8,9 +8,17 @@ import { IoStatsChartSharp } from "react-icons/io5";
 import { AiTwotoneSound } from "react-icons/ai";
 import { MdOutlineFitScreen } from "react-icons/md";
 import { FaBell } from "react-icons/fa6";
-
+import { useSelector } from "react-redux";
 
 export default function CourseStatus() {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
+
+  // Don't render anything for non-FACULTY users
+  if (!isFaculty) {
+    return null;
+  }
+
   return (
     <div id="wd-course-status" style={{ width: "350px" }}>
       <h2>Course Status</h2>

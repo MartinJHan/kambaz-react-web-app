@@ -16,18 +16,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { useState } from "react";
 import { deleteAssignment } from "./reducer";
 
-
 export default function Assignments() {
   const { cid } = useParams();
   const dispatch = useDispatch();
   const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
   const courseAssignments = assignments.filter((a: any) => a.course === cid);
   
-  // State for delete confirmation dialog
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<any>(null);
-  
-
 
   const handleDeleteClick = (assignmentId: string) => {
     const assignment = courseAssignments.find((a: any) => a._id === assignmentId);
@@ -49,14 +47,16 @@ export default function Assignments() {
     setShowDeleteDialog(false);
     setAssignmentToDelete(null);
   };
+
   return (
     <div id="wd-assignments">
-      <AssignmentsControls />
+      {isFaculty && <AssignmentsControls />}
 
       <ListGroup className="rounded-0 mt-5">
         <ListGroup.Item className="wd-assn-cat p-0 mb-5 fs-5 border-gray">
           <div className="wd-category p-3 ps-2 bg-secondary">
-            <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS <AssnCatControlButtons />
+            <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS 
+            {isFaculty && <AssnCatControlButtons />}
           </div>
           <ListGroup className="wd-assns rounded-0">
             {courseAssignments.map((a: any) => (
@@ -76,12 +76,14 @@ export default function Assignments() {
                       <b>Due</b> {a.due} | {a.points} pts
                     </div>
                   </div>
-                  <div className="ms-auto">
-                    <AssnControlButtons 
-                      assignmentId={a._id}
-                      onDelete={handleDeleteClick}
-                    />
-                  </div>
+                  {isFaculty && (
+                    <div className="ms-auto">
+                      <AssnControlButtons 
+                        assignmentId={a._id}
+                        onDelete={handleDeleteClick}
+                      />
+                    </div>
+                  )}
                 </div>
               </ListGroup.Item>
             ))}
@@ -89,7 +91,6 @@ export default function Assignments() {
         </ListGroup.Item>
       </ListGroup>
       
-      {/* Delete Confirmation Dialog */}
       <AssignmentDeleteConfirm
         show={showDeleteDialog}
         onHide={handleDeleteCancel}

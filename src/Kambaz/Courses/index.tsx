@@ -14,12 +14,10 @@ import { Navigate, Route, Routes, useLocation, useParams } from "react-router";
 import PeopleTable from "./People/Table";
 import { LuAlignJustify } from "react-icons/lu";
 
-
 export default function Courses({ courses }: { courses: any[] }) {
   const { cid } = useParams();
   const course = courses.find((course) => course._id === cid);
   const { pathname } = useLocation();
-
 
   return (
     <div id="wd-courses">

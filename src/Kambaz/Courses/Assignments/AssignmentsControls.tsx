@@ -1,5 +1,4 @@
 import { Button, Form } from "react-bootstrap";
-import SearchIcon from "./SearchIcon";
 import { FaPlus } from "react-icons/fa6";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -15,7 +14,6 @@ export default function AssignmentsControls() {
   return (
     <div className="d-flex justify-content-between align-items-center w-100">
       <div className="d-flex align-items-center">
-        <SearchIcon />
         <Form.Control
           type="text"
           placeholder="Search..."

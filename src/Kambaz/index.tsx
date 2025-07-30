@@ -4,34 +4,26 @@ import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 import "./styles.css";
-import { useState } from "react";
-import * as db from "./Database";
+import { useSelector, useDispatch } from "react-redux";
 import ProtectedRoute from "./Account/ProtectedRoute";
-
+import { addCourse, deleteCourse, updateCourse, setSelectedCourse } from "./Courses/reducer";
 
 export default function Kambaz() {
-  const [courses, setCourses] = useState(db.courses);
-  const [course, setCourse] = useState<any>({
-    _id: "0", name: "New Course", number: "New Number",
-    startDate: "2023-09-10", endDate: "2023-12-15",
-    image: "/images/reactjs.jpg", description: "New Description"
-  });
-  const addNewCourse = () => {
-    const newCourse = { ...course, _id: new Date().getTime().toString() };
-    setCourses([...courses, newCourse]);
+  const dispatch = useDispatch();
+  const courses = useSelector((state: any) => state.coursesReducer.courses);
+  const selectedCourse = useSelector((state: any) => state.coursesReducer.selectedCourse);
+
+  const handleAddCourse = (course: any) => {
+    dispatch(addCourse(course));
   };
-  const deleteCourse = (courseId: string) => {
-    setCourses(courses.filter((course) => course._id !== courseId));
+  const handleDeleteCourse = (courseId: string) => {
+    dispatch(deleteCourse(courseId));
   };
-  const updateCourse = () => {
-    setCourses(
-      courses.map((c) => {
-        if (c._id === course._id) {
-          return course;
-        }
-        return c;
-      })
-    );
+  const handleUpdateCourse = (course: any) => {
+    dispatch(updateCourse(course));
+  };
+  const handleSetSelectedCourse = (course: any) => {
+    dispatch(setSelectedCourse(course));
   };
 
   return (
@@ -45,11 +37,11 @@ export default function Kambaz() {
             <ProtectedRoute>
               <Dashboard
                 courses={courses}
-                course={course}
-                setCourse={setCourse}
-                addNewCourse={addNewCourse}
-                deleteCourse={deleteCourse}
-                updateCourse={updateCourse}
+                selectedCourse={selectedCourse}
+                addCourse={handleAddCourse}
+                deleteCourse={handleDeleteCourse}
+                updateCourse={handleUpdateCourse}
+                setSelectedCourse={handleSetSelectedCourse}
               />
             </ProtectedRoute>} />
           <Route path="/Courses/:cid/*" element={

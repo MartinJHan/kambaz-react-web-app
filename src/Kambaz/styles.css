@@ -21,6 +21,10 @@ body * {  font-family: Arial, Helvetica, sans-serif;  }
   max-width: 100%;
 }
 
+#wd-assignments .text-secondary {
+  color: #6c757d !important;
+}
+
 .list-group.wd > .list-group-item.active {
   color: black;
   background-color: white;
