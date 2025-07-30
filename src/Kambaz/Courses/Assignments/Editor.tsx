@@ -1,28 +1,97 @@
+
+
+
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import { useParams, Link } from "react-router-dom";
-import * as db from "../../Database";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addAssignment, updateAssignment } from "./reducer";
 
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
-  const assignment = db.assignments.find(a => a._id === aid && a.course === cid);
-  if (!assignment) return <h3>Assignment not found</h3>;
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  // Get assignments from Redux store instead of database
+  const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  
+  // Check if this is a new assignment (aid === 'new')
+  const isNewAssignment = aid === 'new';
+  const assignment = isNewAssignment ? null : assignments.find((a: any) => a._id === aid && a.course === cid);
+  
+  const currentAssignment = assignment || {
+    _id: isNewAssignment ? `A${Date.now()}` : (aid || ""),
+    title: "",
+    description: "",
+    course: cid || "",
+    availableDate: "",
+    dueDate: "",
+    points: 100,
+    available: "",
+    due: ""
+  };
+
+  const [formData, setFormData] = useState({
+    title: currentAssignment.title,
+    description: currentAssignment.description,
+    points: currentAssignment.points,
+    dueDate: currentAssignment.dueDate,
+    availableDate: currentAssignment.availableDate
+  });
+
+  const handleSave = () => {
+    const assignmentData = {
+      _id: currentAssignment._id,
+      title: formData.title,
+      description: formData.description,
+      course: cid || "",
+      availableDate: formData.availableDate,
+      dueDate: formData.dueDate,
+      points: formData.points,
+      available: formData.availableDate || "",
+      due: formData.dueDate || ""
+    };
+
+    if (isNewAssignment) {
+      dispatch(addAssignment(assignmentData));
+    } else {
+      dispatch(updateAssignment(assignmentData));
+    }
+    
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
   return (
     <div id="wd-assignments-editor">
       <Form>
         <Form.Group className="ms-1 mb-2">
           <Form.Label className="mb-2">Assignment Name</Form.Label>
-          <Form.Control id="wd-name" value={assignment.title} />
+          <Form.Control 
+            id="wd-name" 
+            value={formData.title}
+            onChange={(e) => setFormData({...formData, title: e.target.value})}
+          />
         </Form.Group>
-        <div className="ms-1 mb-3 border rounded p-3">
-          <p>{assignment.description}</p>
-        </div>
+        <Form.Group className="ms-1 mb-2">
+          <Form.Label className="mb-2">Description</Form.Label>
+          <Form.Control 
+            as="textarea" 
+            rows={3} 
+            placeholder="Assignment description..."
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+          />
+        </Form.Group>
       </Form>
       <Container>
         <Row className="mb-2">
           <Col className="text-end" xs={3}>Points</Col>
           <Col>
-            <Form.Control id="wd-points" value={assignment.points} />
+            <Form.Control 
+              id="wd-points" 
+              value={formData.points}
+              onChange={(e) => setFormData({...formData, points: parseInt(e.target.value) || 0})}
+            />
           </Col>
         </Row>
         <Row className="mb-2">
@@ -72,17 +141,32 @@ export default function AssignmentEditor() {
               </Form.Group>
               <Form.Group className="mb-4">
                 <Form.Label className="mb-2"><b>Due</b></Form.Label>
-                <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.dueDate} />
+                <Form.Control 
+                  type="date" 
+                  id="wd-assignment-due" 
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                />
               </Form.Group>
               <Form.Group>
                 <Row>
                   <Col>
                     <Form.Label className="mb-2"><b>Available from</b></Form.Label>
-                    <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.availableDate} />
+                    <Form.Control 
+                      type="date" 
+                      id="wd-assignment-available" 
+                      value={formData.availableDate}
+                      onChange={(e) => setFormData({...formData, availableDate: e.target.value})}
+                    />
                   </Col>
                   <Col>
                     <Form.Label className="mb-2"><b>Until</b></Form.Label>
-                    <Form.Control type="date" id="wd-assignment-due" defaultValue={assignment.dueDate} />
+                    <Form.Control 
+                      type="date" 
+                      id="wd-assignment-until" 
+                      value={formData.dueDate}
+                      onChange={(e) => setFormData({...formData, dueDate: e.target.value})}
+                    />
                   </Col>
                 </Row>
               </Form.Group>
@@ -95,9 +179,9 @@ export default function AssignmentEditor() {
         <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
           <Button variant="secondary">Cancel</Button>
         </Link>
-        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button variant="danger" className="ms-2">Save</Button>
-        </Link>
+        <Button variant="danger" className="ms-2" onClick={handleSave}>
+          Save
+        </Button>
       </div>
     </div>
   );

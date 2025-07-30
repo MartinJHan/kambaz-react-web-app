@@ -1,19 +1,29 @@
-import { FaPlus } from "react-icons/fa6";
 import { Button, Form } from "react-bootstrap";
 import SearchIcon from "./SearchIcon";
+import { FaPlus } from "react-icons/fa6";
+import { useNavigate, useParams } from "react-router-dom";
+
 
 export default function AssignmentsControls() {
+  const navigate = useNavigate();
+  const { cid } = useParams();
+
+  const handleAddAssignment = () => {
+    navigate(`/Kambaz/Courses/${cid}/Assignments/new`);
+  };
+
   return (
-    <div className="d-flex">
-      <SearchIcon />
-      <Form.Control
-        type="text"
-        placeholder="Search..."
-        id="wd-search-assignments"
-        className="mb-1 ms-1 w-25"
-        style={{ paddingLeft: "2rem" }}
-      />
-      <div className="ms-auto d-flex">
+    <div className="d-flex justify-content-between align-items-center w-100">
+      <div className="d-flex align-items-center">
+        <SearchIcon />
+        <Form.Control
+          type="text"
+          placeholder="Search..."
+          id="wd-search-assignments"
+          className="mb-1 w-25"
+        />
+      </div>
+      <div className="d-flex">
         <Button
           id="wd-add-assignments-cat"
           variant="secondary"
@@ -28,6 +38,7 @@ export default function AssignmentsControls() {
           id="wd-add-assignments"
           variant="danger"
           size="lg"
+          onClick={handleAddAssignment}
         >
           <FaPlus className="me-2" />
           Assignment

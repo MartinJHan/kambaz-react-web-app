@@ -4,7 +4,21 @@ body * {  font-family: Arial, Helvetica, sans-serif;  }
 @media (min-width: 768px) {
   #wd-kambaz .wd-main-content-offset {
     padding-left: 140px !important;
+    width: calc(100vw - 140px) !important;
   }
+}
+
+#wd-courses {
+  width: 100%;
+}
+
+#wd-courses .d-flex {
+  width: 100%;
+}
+
+#wd-courses .flex-fill {
+  width: 100%;
+  max-width: 100%;
 }
 
 .list-group.wd > .list-group-item.active {

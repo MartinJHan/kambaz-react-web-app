@@ -1,16 +1,54 @@
+
+
+
+
+
+
 import { ListGroup } from "react-bootstrap";
 import AssignmentsControls from "./AssignmentsControls";
 import AssnCatControlButtons from "./AssnCatControlButtons";
 import AssnControlButtons from "./AssnControlButtons";
+import AssignmentDeleteConfirm from "./AssignmentDeleteConfirm";
 import { BsGripVertical } from "react-icons/bs";
 import { MdAssignment } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database";
+import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
+import { deleteAssignment } from "./reducer";
 
 
 export default function Assignments() {
   const { cid } = useParams();
-  const courseAssignments = db.assignments.filter((a) => a.course === cid);
+  const dispatch = useDispatch();
+  const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  const courseAssignments = assignments.filter((a: any) => a.course === cid);
+  
+  // State for delete confirmation dialog
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<any>(null);
+  
+
+
+  const handleDeleteClick = (assignmentId: string) => {
+    const assignment = courseAssignments.find((a: any) => a._id === assignmentId);
+    if (assignment) {
+      setAssignmentToDelete(assignment);
+      setShowDeleteDialog(true);
+    }
+  };
+
+  const handleDeleteConfirm = () => {
+    if (assignmentToDelete) {
+      dispatch(deleteAssignment(assignmentToDelete._id));
+    }
+    setShowDeleteDialog(false);
+    setAssignmentToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setAssignmentToDelete(null);
+  };
   return (
     <div id="wd-assignments">
       <AssignmentsControls />
@@ -21,7 +59,7 @@ export default function Assignments() {
             <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS <AssnCatControlButtons />
           </div>
           <ListGroup className="wd-assns rounded-0">
-            {courseAssignments.map((a) => (
+            {courseAssignments.map((a: any) => (
               <ListGroup.Item key={a._id} className="wd-assn p-3 ps-1">
                 <div className="d-flex align-items-center">
                   <BsGripVertical className="me-2 fs-3" />
@@ -39,7 +77,10 @@ export default function Assignments() {
                     </div>
                   </div>
                   <div className="ms-auto">
-                    <AssnControlButtons />
+                    <AssnControlButtons 
+                      assignmentId={a._id}
+                      onDelete={handleDeleteClick}
+                    />
                   </div>
                 </div>
               </ListGroup.Item>
@@ -47,6 +88,14 @@ export default function Assignments() {
           </ListGroup>
         </ListGroup.Item>
       </ListGroup>
+      
+      {/* Delete Confirmation Dialog */}
+      <AssignmentDeleteConfirm
+        show={showDeleteDialog}
+        onHide={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        assignmentTitle={assignmentToDelete?.title || ""}
+      />
     </div>
   );
 }
