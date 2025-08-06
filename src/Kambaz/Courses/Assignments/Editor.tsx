@@ -5,29 +5,84 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addAssignment, updateAssignment } from "./reducer";
+import { createAssignmentAPI, updateAssignmentAPI, loadAssignments } from "./reducer";
+import type { AppDispatch } from "../../store";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   
   const assignments = useSelector((state: any) => state.assignmentsReducer.assignments);
+  const loading = useSelector((state: any) => state.assignmentsReducer.loading);
+  const error = useSelector((state: any) => state.assignmentsReducer.error);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  
+  console.log('Editor Debug:', { cid, aid, assignments, loading, error, isFaculty });
+  
+  useEffect(() => {
+    console.log('Loading assignments...');
+    dispatch(loadAssignments());
+  }, [dispatch]);
   
   useEffect(() => {
     if (!isFaculty) {
       navigate(`/Kambaz/Courses/${cid}/Assignments`);
     }
   }, [isFaculty, navigate, cid]);
-  
+
+  const [formData, setFormData] = useState(() => ({
+    title: "",
+    description: "",
+    points: 100,
+    dueDate: "",
+    availableDate: ""
+  }));
+
+  useEffect(() => {
+    if (assignments && Array.isArray(assignments)) {
+      const isNewAssignment = aid === 'new';
+      const assignment = isNewAssignment ? null : assignments.find((a: any) => a._id === aid && a.course === cid);
+      
+      if (assignment) {
+        console.log('Updating form data with assignment:', assignment);
+        setFormData({
+          title: assignment.title || "",
+          description: assignment.description || "",
+          points: assignment.points || 100,
+          dueDate: assignment.dueDate || "",
+          availableDate: assignment.availableDate || ""
+        });
+      }
+    }
+  }, [assignments, aid, cid]);
+
   if (!isFaculty) {
     return null;
+  }
+
+  if (loading) {
+    return <div className="text-center mt-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-4 text-danger">Error: {error}</div>;
+  }
+
+  if (!assignments || !Array.isArray(assignments)) {
+    console.log('Assignments not loaded yet:', assignments);
+    return <div className="text-center mt-4">Loading assignment data...</div>;
   }
   
   const isNewAssignment = aid === 'new';
   const assignment = isNewAssignment ? null : assignments.find((a: any) => a._id === aid && a.course === cid);
+  
+  console.log('Assignment found:', assignment);
+  
+  if (!isNewAssignment && !assignment) {
+    return <div className="text-center mt-4 text-danger">Assignment not found</div>;
+  }
   
   const currentAssignment = assignment || {
     _id: isNewAssignment ? `A${Date.now()}` : (aid || ""),
@@ -41,15 +96,8 @@ export default function AssignmentEditor() {
     due: ""
   };
 
-  const [formData, setFormData] = useState({
-    title: currentAssignment.title,
-    description: currentAssignment.description,
-    points: currentAssignment.points,
-    dueDate: currentAssignment.dueDate,
-    availableDate: currentAssignment.availableDate
-  });
-
-  const handleSave = () => {
+  const handleSave = async () => {
+    console.log('Saving assignment:', formData);
     const assignmentData = {
       _id: currentAssignment._id,
       title: formData.title,
@@ -62,13 +110,16 @@ export default function AssignmentEditor() {
       due: formData.dueDate || ""
     };
 
-    if (isNewAssignment) {
-      dispatch(addAssignment(assignmentData));
-    } else {
-      dispatch(updateAssignment(assignmentData));
+    try {
+      if (isNewAssignment) {
+        await dispatch(createAssignmentAPI(assignmentData));
+      } else {
+        await dispatch(updateAssignmentAPI(assignmentData));
+      }
+      navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    } catch (error) {
+      console.error('Error saving assignment:', error);
     }
-    
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };
 
   return (

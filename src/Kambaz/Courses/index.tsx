@@ -13,11 +13,38 @@ import AssignmentEditor from "./Assignments/Editor";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router";
 import PeopleTable from "./People/Table";
 import { LuAlignJustify } from "react-icons/lu";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Courses({ courses }: { courses: any[] }) {
   const { cid } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const enrollments = useSelector((state: any) => state.enrollmentsReducer.enrollments);
+  const isFaculty = currentUser?.role === "FACULTY";
+  
   const course = courses.find((course) => course._id === cid);
   const { pathname } = useLocation();
+
+  const isEnrolledInCourse = () => {
+    if (isFaculty) return true; // Faculty can access all courses
+    return enrollments.some((e: any) => e.user === currentUser?._id && e.course === cid);
+  };
+
+  useEffect(() => {
+    if (currentUser && !isEnrolledInCourse()) {
+      navigate("/Kambaz/Dashboard");
+    }
+  }, [currentUser, enrollments, cid, navigate]);
+
+  if (!course) {
+    return <div className="text-center mt-4">Course not found</div>;
+  }
+
+  if (!isEnrolledInCourse()) {
+    return <div className="text-center mt-4">You are not enrolled in this course</div>;
+  }
 
   return (
     <div id="wd-courses">
