@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 
 export default function AccountNavigation() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-
   return (
     <ListGroup className="rounded-0 wd">
       {!currentUser && (
@@ -12,7 +11,7 @@ export default function AccountNavigation() {
           <ListGroup.Item as={Link} to="/Kambaz/Account/Signin"
             className="active border border-0"> Signin </ListGroup.Item>
 
-          <ListGroup.Item as={Link} to="/Kambaz/Account/Signup"
+          <ListGroup.Item as={Link} to="/Kambaz/Account/Signup" 
             className="text-danger border border-0"> Signup </ListGroup.Item>
         </>
       )}
@@ -21,6 +20,12 @@ export default function AccountNavigation() {
         <ListGroup.Item as={Link} to="/Kambaz/Account/Profile"
           className="text-danger border border-0"> Profile </ListGroup.Item>
       )}
+
+      {currentUser && currentUser.role === "ADMIN" && (
+        <ListGroup.Item as={Link} to="/Kambaz/Account/Users" 
+          className="text-danger border border-0"> Users </ListGroup.Item>
+      )}
+
     </ListGroup>
   );
 }
