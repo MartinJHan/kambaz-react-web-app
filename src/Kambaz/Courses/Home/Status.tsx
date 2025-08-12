@@ -13,9 +13,10 @@ import { useSelector } from "react-redux";
 export default function CourseStatus() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  const isAdmin = currentUser?.role === "ADMIN";
 
-  // Don't render anything for non-FACULTY users
-  if (!isFaculty) {
+  // Don't render anything for non-FACULTY and non-ADMIN users
+  if (!isFaculty && !isAdmin) {
     return null;
   }
 

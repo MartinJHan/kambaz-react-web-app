@@ -27,7 +27,13 @@ const enrollmentSlice = createSlice({
       state.enrollments = enrollments;
     },
     addEnrollment: (state, { payload: enrollment }) => {
-      state.enrollments.push(enrollment);
+      // 检查是否已存在相同的enrollment
+      const exists = state.enrollments.some(
+        (e) => e.user === enrollment.user && e.course === enrollment.course
+      );
+      if (!exists) {
+        state.enrollments.push(enrollment);
+      }
     },
     removeEnrollment: (state, { payload: { userId, courseId } }) => {
       state.enrollments = state.enrollments.filter(
@@ -71,24 +77,30 @@ export const loadUserEnrollments = (userId: string) => async (dispatch: any) => 
 
 export const enrollUserInCourseAPI = (userId: string, courseId: string) => async (dispatch: any) => {
   try {
+    dispatch(setLoading(true));
     const enrollment = await client.enrollUserInCourse(userId, courseId);
-    // After enrolling, reload all enrollments to ensure state is in sync
-    await dispatch(loadEnrollments());
+    // 添加新的enrollment到状态
+    dispatch(addEnrollment(enrollment));
+    dispatch(setLoading(false));
     return enrollment;
   } catch (error) {
     dispatch(setError('Failed to enroll in course'));
+    dispatch(setLoading(false));
     throw error;
   }
 };
 
 export const unenrollUserFromCourseAPI = (userId: string, courseId: string) => async (dispatch: any) => {
   try {
+    dispatch(setLoading(true));
     const result = await client.unenrollUserFromCourse(userId, courseId);
-    // After unenrolling, reload all enrollments to ensure state is in sync
-    await dispatch(loadEnrollments());
+    // 从状态中移除enrollment
+    dispatch(removeEnrollment({ userId, courseId }));
+    dispatch(setLoading(false));
     return result;
   } catch (error) {
     dispatch(setError('Failed to unenroll from course'));
+    dispatch(setLoading(false));
     throw error;
   }
 };

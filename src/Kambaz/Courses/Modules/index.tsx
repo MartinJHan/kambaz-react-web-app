@@ -19,6 +19,7 @@ export default function Modules() {
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  const isAdmin = currentUser?.role === "ADMIN";
   const dispatch = useDispatch();
 
   const saveModule = async (module: any) => {
@@ -39,17 +40,20 @@ export default function Modules() {
   };
 
   const fetchModules = async () => {
-    const modules = await coursesClient.findModulesForCourse(cid as string);
+    if (!cid) return;
+    const modules = await coursesClient.findModulesForCourse(cid);
     dispatch(setModules(modules));
   };
   useEffect(() => {
-    fetchModules();
-  }, []);
+    if (cid) {
+      fetchModules();
+    }
+  }, [cid]);
 
 
   return (
     <div>
-      {isFaculty && (
+      {(isFaculty || isAdmin) && (
         <ModulesControls moduleName={moduleName} setModuleName={setModuleName}
           addModule={createModuleForCourse} />
       )}
@@ -61,7 +65,7 @@ export default function Modules() {
               <div className="wd-title p-3 ps-2 bg-secondary">
                 <BsGripVertical className="me-2 fs-3" />
                 {!module.editing && module.name}
-                {module.editing && isFaculty && (
+                {module.editing && (isFaculty || isAdmin) && (
                   <FormControl className="w-50 d-inline-block"
                     onChange={(e) =>
                       dispatch(updateModule({ ...module, name: e.target.value }))
@@ -73,7 +77,7 @@ export default function Modules() {
                     }}
                     defaultValue={module.name} />
                 )}
-                {isFaculty && (
+                {(isFaculty || isAdmin) && (
                   <ModuleControlButtons moduleId={module._id}
                     deleteModule={(moduleId) => removeModule(moduleId)}
                     editModule={(moduleId) => dispatch(editModule(moduleId))} />
@@ -84,7 +88,7 @@ export default function Modules() {
                   {module.lessons.map((lesson: any) => (
                     <ListGroup.Item className="wd-lesson p-3 ps-1" key={lesson._id}>
                       <BsGripVertical className="me-2 fs-3" /> {lesson.name}
-                      {isFaculty && <LessonControlButtons />}
+                      {(isFaculty || isAdmin) && <LessonControlButtons />}
                     </ListGroup.Item>
                   ))}
                 </ListGroup>

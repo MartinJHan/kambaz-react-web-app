@@ -1,10 +1,12 @@
 import axios from "axios";
+const axiosWithCredentials = axios.create({ withCredentials: true });
+
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER || "http://localhost:4000";
 const ENROLLMENTS_API = `${HTTP_SERVER}/api/enrollments`;
 
 export const fetchAllEnrollments = async () => {
   try {
-    const response = await axios.get(ENROLLMENTS_API);
+    const response = await axiosWithCredentials.get(ENROLLMENTS_API);
     return response.data;
   } catch (error) {
     console.error('Error fetching enrollments:', error);
@@ -14,7 +16,7 @@ export const fetchAllEnrollments = async () => {
 
 export const findEnrollmentsForUser = async (userId: string) => {
   try {
-    const response = await axios.get(`${ENROLLMENTS_API}/user/${userId}`);
+    const response = await axiosWithCredentials.get(`${ENROLLMENTS_API}/user/${userId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching user enrollments:', error);
@@ -24,7 +26,7 @@ export const findEnrollmentsForUser = async (userId: string) => {
 
 export const findEnrollmentsForCourse = async (courseId: string) => {
   try {
-    const response = await axios.get(`${ENROLLMENTS_API}/course/${courseId}`);
+    const response = await axiosWithCredentials.get(`${ENROLLMENTS_API}/course/${courseId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching course enrollments:', error);
@@ -34,29 +36,33 @@ export const findEnrollmentsForCourse = async (courseId: string) => {
 
 export const enrollUserInCourse = async (userId: string, courseId: string) => {
   try {
-    const response = await axios.post(ENROLLMENTS_API, { userId, courseId });
+    const response = await axiosWithCredentials.put(`${ENROLLMENTS_API}/${userId}/${courseId}`);
     return response.data;
   } catch (error) {
     console.error('Error enrolling user in course:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error response:', error.response.data);
+    }
     throw error;
   }
 };
 
 export const unenrollUserFromCourse = async (userId: string, courseId: string) => {
   try {
-    const response = await axios.delete(ENROLLMENTS_API, { 
-      data: { userId, courseId } 
-    });
+    const response = await axiosWithCredentials.delete(`${ENROLLMENTS_API}/${userId}/${courseId}`);
     return response.data;
   } catch (error) {
     console.error('Error unenrolling user from course:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Error response:', error.response.data);
+    }
     throw error;
   }
 };
 
 export const deleteEnrollment = async (enrollmentId: string) => {
   try {
-    const response = await axios.delete(`${ENROLLMENTS_API}/${enrollmentId}`);
+    const response = await axiosWithCredentials.delete(`${ENROLLMENTS_API}/${enrollmentId}`);
     return response.data;
   } catch (error) {
     console.error('Error deleting enrollment:', error);

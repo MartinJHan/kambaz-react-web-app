@@ -17,7 +17,8 @@ export default function AssignmentEditor() {
   const loading = useSelector((state: any) => state.assignmentsReducer.loading);
   const error = useSelector((state: any) => state.assignmentsReducer.error);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const isFaculty = currentUser?.role === "FACULTY";
+  const isFaculty = currentUser?.role === "FACULTY" || currentUser?.role === "TA";
+  const isAdmin = currentUser?.role === "ADMIN";
   
   console.log('Editor Debug:', { cid, aid, assignments, loading, error, isFaculty });
   
@@ -27,10 +28,10 @@ export default function AssignmentEditor() {
   }, [dispatch]);
   
   useEffect(() => {
-    if (!isFaculty) {
+    if (!isFaculty && !isAdmin) {
       navigate(`/Kambaz/Courses/${cid}/Assignments`);
     }
-  }, [isFaculty, navigate, cid]);
+  }, [isFaculty, isAdmin, navigate, cid]);
 
   const [formData, setFormData] = useState(() => ({
     title: "",
@@ -58,7 +59,7 @@ export default function AssignmentEditor() {
     }
   }, [assignments, aid, cid]);
 
-  if (!isFaculty) {
+  if (!isFaculty && !isAdmin) {
     return null;
   }
 

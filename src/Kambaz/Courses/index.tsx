@@ -23,12 +23,13 @@ export default function Courses({ courses }: { courses: any[] }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const enrollments = useSelector((state: any) => state.enrollmentsReducer.enrollments);
   const isFaculty = currentUser?.role === "FACULTY";
+  const isAdmin = currentUser?.role === "ADMIN";
   
   const course = courses.find((course) => course._id === cid);
   const { pathname } = useLocation();
 
   const isEnrolledInCourse = () => {
-    if (isFaculty) return true; // Faculty can access all courses
+    if (isFaculty || isAdmin) return true; // Faculty and Admin can access all courses
     return enrollments.some((e: any) => e.user === currentUser?._id && e.course === cid);
   };
 

@@ -25,6 +25,7 @@ export default function Assignments() {
   const error = useSelector((state: any) => state.assignmentsReducer.error);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+  const isAdmin = currentUser?.role === "ADMIN";
   
   console.log('Assignments Debug:', { cid, assignments, loading, error, isFaculty });
   
@@ -82,13 +83,13 @@ export default function Assignments() {
 
   return (
     <div id="wd-assignments">
-      {isFaculty && <AssignmentsControls />}
+      {(isFaculty || isAdmin) && <AssignmentsControls />}
 
       <ListGroup className="rounded-0 mt-5">
         <ListGroup.Item className="wd-assn-cat p-0 mb-5 fs-5 border-gray">
           <div className="wd-category p-3 ps-2 bg-secondary">
             <BsGripVertical className="me-2 fs-3" /> ASSIGNMENTS 
-            {isFaculty && <AssnCatControlButtons />}
+            {(isFaculty || isAdmin) && <AssnCatControlButtons />}
           </div>
           <ListGroup className="wd-assns rounded-0">
             {courseAssignments.map((a: any) => (
@@ -108,7 +109,7 @@ export default function Assignments() {
                       <b>Due</b> {a.due} | {a.points} pts
                     </div>
                   </div>
-                  {isFaculty && (
+                  {(isFaculty || isAdmin) && (
                     <div className="ms-auto">
                       <AssnControlButtons 
                         assignmentId={a._id}
